@@ -27,7 +27,7 @@ def load_lmt_data(lmt_data, bones_baseposs, bones_baserots, rename_bones=False, 
             fcurve_loc_z = action.fcurves.new(data_path=loc_data_path, index=2)
             for time, values in pos_keyframes.items():
                 keyframe_pos = Vector([values[0], values[1], values[2]])
-                if bone_name in bones_baseposs and bone_action["pos_referencial"] == "local":
+                if bone_name in bones_baseposs:# and bone_action["pos_referencial"] == "local":
                     keyframe_pos = keyframe_pos - (bones_baseposs[bone_name])
 
                 keyframe_x = fcurve_loc_x.keyframe_points.insert(frame=int(time),value=keyframe_pos[0])

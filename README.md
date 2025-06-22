@@ -38,6 +38,10 @@ Player animations are located in the `mot/pl` directory.
 
 Map models are located in the `stage` directory.
 
+A list of monster IDs (and much more) can be found at this link:
+
+https://docs.google.com/spreadsheets/d/1dLvVquwX2pwz5AaTFIM0kZ-2CQzSP7jLT89Ub4T-it4
+
 ## Supported types
 
 ### Meshes (mod files)
