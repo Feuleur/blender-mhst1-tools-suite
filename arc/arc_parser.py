@@ -9,6 +9,7 @@ from glob import glob
 import ctypes
 import numpy as np
 import shutil
+import json
 
 import logging
 logger = logging.getLogger("mhst1_import")
@@ -722,6 +723,7 @@ def bulk_extract_arc(context):
     logger.info("Found " + str(len(arc_files)) + " arc files.")
 
     extracted_file_count = 0
+    file_list = set()
     for arc_file_i, arc_file in enumerate(arc_files):
         with open(arc_file, "rb") as file_in:
             data = file_in.read()
@@ -766,6 +768,7 @@ def bulk_extract_arc(context):
             file_infos.append(file_info)
 
         for file_info in file_infos:
+            file_list.add((file_info["file_path"] + file_info["extension"]).replace("\\", "/"))
             output_name = os.path.join(extraction_path, file_info["file_path"] + file_info["extension"])
             if os.path.exists(output_name):
                 pass
@@ -781,14 +784,15 @@ def bulk_extract_arc(context):
                 with open(output_name, "wb") as file_out:
                     file_out.write(decompressed_bytes)
 
-            if extracted_file_count%50 == 0:
-                logger.info(str(extracted_file_count) + "/" + str(len(arc_files)) + " arc files extracted")
-            extracted_file_count += 1
+        if extracted_file_count%50 == 0:
+            logger.info(str(extracted_file_count) + "/" + str(len(arc_files)) + " arc files extracted")
+        extracted_file_count += 1
 
     logger.info(str(extracted_file_count) + " arc files extracted.")
 
+
     if extraction_path != installation_path:
-        extracted_file_count += 1
+        extracted_file_count = 0
 
         other_files = []
         for x in glob(os.path.join(installation_path, "nativeDX11x64", "**", "*"), recursive=True):
@@ -797,6 +801,7 @@ def bulk_extract_arc(context):
         logger.info("Found " + str(len(other_files)) + " other files.")
 
         for other_file in other_files:
+            file_list.add(other_file[other_file.find("nativeDX11x64") + len("nativeDX11x64")+1:].replace("\\", "/"))
             dest_path = os.path.join(extraction_path, other_file[other_file.find("nativeDX11x64") + len("nativeDX11x64")+1:])
             if os.path.exists(dest_path):
                 pass
@@ -810,6 +815,9 @@ def bulk_extract_arc(context):
                 logger.info(str(extracted_file_count) + "/" + str(len(other_files)) + " other files extracted")
             extracted_file_count += 1
 
+    file_list = sorted(list(file_list))
+    with open(os.path.join(extraction_path, "file_list.json"), "w") as json_out:
+        json.dump(file_list, json_out, indent="\t")
     if sys.platform == "win32":
         dll_close = ctypes.windll.kernel32.FreeLibrary
         dll_close.argtypes = [ctypes.c_void_p]
